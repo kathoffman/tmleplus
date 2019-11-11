@@ -6,4 +6,4 @@ To install:
 
 ```devtools::install_github("hoffmakl/tmleplus")```
 
-Fit objects come from R packages `tmle`[https://cran.r-project.org/web/packages/tmle/tmle.pdf], `ltmle`, `survtmle`, or `SuperLearner` depending on the function.
+Fit objects come from R packages (`tmle`)[https://cran.r-project.org/web/packages/tmle/tmle.pdf], `ltmle`, `survtmle`, or `SuperLearner` depending on the function.
