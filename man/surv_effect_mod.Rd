@@ -30,15 +30,7 @@ ftime <- round(1 + runif(n, 1, 4) - trt*eff + adjustVars$W1 + adjustVars$W2)
 ftype <- round(runif(n, 0, 1))
 dat <- data.frame(trt, eff, adjustVars, ftime, ftype)
 
-fit_full <- survtmle::survtmle(ftime = ftime, ftype = ftype,
-                     trt = trt, adjustVars = adjustVars,
-                     SL.trt = c("SL.glm", "SL.mean", "SL.step"),
-                     SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
-                     SL.ctime = c("SL.glm", "SL.mean", "SL.step"),
-                     method = "hazard", t0 = t_0)
-fit_full
-
-dat_a <- dat \%>\% filter(eff == 0)
+dat_a <- dat[dat$eff == 0,]
 trt <- dat_a$trt
 adjustVars <- dat_a \%>\% select(W1, W2)
 ftime <- dat_a$ftime
@@ -49,10 +41,9 @@ fit_a <- survtmle::survtmle(ftime = ftime, ftype = ftype,
                   SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
                   SL.ctime = c("SL.glm", "SL.mean", "SL.step"),
                   method = "hazard", t0 = t_0)
-fit_a
 
 
-dat_b <- dat \%>\% filter(eff == 1)
+dat_b <- dat[dat$eff == 1,]
 trt <- dat_b$trt
 adjustVars <- dat_b \%>\% select(W1, W2)
 ftime <- dat_b$ftime
@@ -63,6 +54,6 @@ fit_b <- survtmle::survtmle(ftime = ftime, ftype = ftype,
                   SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
                   SL.ctime = c("SL.glm", "SL.mean", "SL.step"),
                   method = "hazard", t0 = t_0)
-fit_b
+
 surv_effect_mod(dat_full = dat, mod_var = "eff", tmle_fit_0 = fit_a, tmle_fit_1 = fit_b)
 }
