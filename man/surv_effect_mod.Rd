@@ -4,17 +4,65 @@
 \alias{surv_effect_mod}
 \title{Calculate effect modification from survtmle fit objects}
 \usage{
-surv_effect_mod(dat_full, mod_var, tmle_fit_0, tmle_fit_1)
+surv_effect_mod(tmle_fit_0, tmle_fit_1, dat_full, mod_var)
 }
 \arguments{
-\item{dat_full}{The full data set containing all observations used to obtain each `tmle_fit_1` and `tmle_fit_0`.}
-
-\item{mod_var}{String containing column name of the effect modifying variable in `dat_full`.}
-
 \item{tmle_fit_0}{survtmle fit object for only patients without the effect modifier}
 
 \item{tmle_fit_1}{survtmle fit object for only patients with the effect modifier}
+
+\item{dat_full}{The full data set containing all observations used to obtain each `tmle_fit_1` and `tmle_fit_0`.}
+
+\item{mod_var}{String containing column name of the effect modifying variable in `dat_full`.}
 }
 \description{
 This calculations an effect modifier's difference and corresponding standard error for the cumulative hazard incidence using objects obtained from the `survtmle` package.
+}
+\examples{
+# Modified version of the survtmle vignette example
+set.seed(1234)
+n <- 1000
+t_0 <- 6
+trt <- rbinom(n, 1, 0.5)
+eff <- rbinom(n, 1, 0.5)
+adjustVars <- data.frame(W1 = round(runif(n)), W2 = round(runif(n, 0, 2)))
+ftime <- round(1 + runif(n, 1, 4) - trt*eff + adjustVars$W1 + adjustVars$W2)
+ftype <- round(runif(n, 0, 1))
+dat <- data.frame(trt, eff, adjustVars, ftime, ftype)
+
+fit_full <- survtmle::survtmle(ftime = ftime, ftype = ftype,
+                     trt = trt, adjustVars = adjustVars,
+                     SL.trt = c("SL.glm", "SL.mean", "SL.step"),
+                     SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
+                     SL.ctime = c("SL.glm", "SL.mean", "SL.step"),
+                     method = "hazard", t0 = t_0)
+fit_full
+
+dat_a <- dat \%>\% filter(eff == 0)
+trt <- dat_a$trt
+adjustVars <- dat_a \%>\% select(W1, W2)
+ftime <- dat_a$ftime
+ftype <- dat_a$ftype
+fit_a <- survtmle::survtmle(ftime = ftime, ftype = ftype,
+                  trt = trt, adjustVars = adjustVars,
+                  SL.trt = c("SL.glm", "SL.mean", "SL.step"),
+                  SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
+                  SL.ctime = c("SL.glm", "SL.mean", "SL.step"),
+                  method = "hazard", t0 = t_0)
+fit_a
+
+
+dat_b <- dat \%>\% filter(eff == 1)
+trt <- dat_b$trt
+adjustVars <- dat_b \%>\% select(W1, W2)
+ftime <- dat_b$ftime
+ftype <- dat_b$ftype
+fit_b <- survtmle::survtmle(ftime = ftime, ftype = ftype,
+                  trt = trt, adjustVars = adjustVars,
+                  SL.trt = c("SL.glm", "SL.mean", "SL.step"),
+                  SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
+                  SL.ctime = c("SL.glm", "SL.mean", "SL.step"),
+                  method = "hazard", t0 = t_0)
+fit_b
+surv_effect_mod(dat_full = dat, mod_var = "eff", tmle_fit_0 = fit_a, tmle_fit_1 = fit_b)
 }
