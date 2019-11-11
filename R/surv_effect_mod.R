@@ -8,7 +8,7 @@
 #' @return
 #' @export
 #'
-#' @examples
+#' @examples library(survtmle)
 surv_effect_mod <- function(tmle_fit_0, tmle_fit_1, dat_full, mod_var){
 
     if (length(c(tmle_fit_0$trt, tmle_fit_1$trt)) == nrow(dat_full)){
