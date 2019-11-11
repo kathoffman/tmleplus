@@ -1,6 +1,6 @@
 # tmleplus
 
-Generalized functions produced from code originally written by Dr. Ivan Diaz to calculate additional effects and standard errors from various types of tmle objects.
+Generalized functions produced from code originally written by Dr. Ivan Diaz to calculate additional effects and standard errors from various types of Target Maximum Likelihood Estimation (TMLE) objects.
 
 To install:
 
