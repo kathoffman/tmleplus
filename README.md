@@ -1,4 +1,4 @@
-# tmleplus
+# `tmleplus`
 
 Functions produced with the help of Dr. Iván Díaz to calculate additional effects and standard errors from various types of Target Maximum Likelihood Estimation (TMLE) objects.
 
