@@ -21,12 +21,12 @@
 #' dat <- data.frame(trt, eff, adjustVars, ftime, ftype)
 #'
 #' # Run survtmle for all subjects without the effect modifier
-#' dat_a <- dat[dat$eff == 0,]
-#' trt <- dat_a$trt
-#' adjustVars <- dat_a %>% select(W1, W2)
-#' ftime <- dat_a$ftime
-#' ftype <- dat_a$ftype
-#' fit_a <- survtmle::survtmle(ftime = ftime, ftype = ftype,
+#' dat_noeff <- dat[dat$eff == 0,]
+#' trt <- dat_noeff$trt
+#' adjustVars <- dat_noeff[c("W1", "W2)]
+#' ftime <- dat_noeff$ftime
+#' ftype <- dat_noeff$ftype
+#' fit_noeff <- survtmle::survtmle(ftime = ftime, ftype = ftype,
 #'                   trt = trt, adjustVars = adjustVars,
 #'                   SL.trt = c("SL.glm", "SL.mean", "SL.step"),
 #'                   SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
@@ -34,12 +34,12 @@
 #'                   method = "hazard", t0 = t_0)
 #'
 #' # Run survtmle for all subjects with the effect modifier
-#' dat_b <- dat[dat$eff == 1,]
-#' trt <- dat_b$trt
-#' adjustVars <- dat_b %>% select(W1, W2)
-#' ftime <- dat_b$ftime
-#' ftype <- dat_b$ftype
-#' fit_b <- survtmle::survtmle(ftime = ftime, ftype = ftype,
+#' dat_eff <- dat[dat$eff == 1,]
+#' trt <- dat_eff$trt
+#' adjustVars <- dat_eff[c("W1", "W2)]
+#' ftime <- dat_eff$ftime
+#' ftype <- dat_eff$ftype
+#' fit_eff <- survtmle::survtmle(ftime = ftime, ftype = ftype,
 #'                   trt = trt, adjustVars = adjustVars,
 #'                   SL.trt = c("SL.glm", "SL.mean", "SL.step"),
 #'                   SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
@@ -47,7 +47,7 @@
 #'                   method = "hazard", t0 = t_0)
 #'
 #' # Using the full data set, specify the effect modification column name as a string and tmle fits as 3rd and 4th args
-#' surv_effect_mod(dat_full = dat, mod_var = "eff", tmle_fit_0 = fit_a, tmle_fit_1 = fit_b)
+#' surv_effect_mod(dat_full = dat, mod_var = "eff", tmle_fit_0 = fit_noeff, tmle_fit_1 = fit_eff)
 
 surv_effect_mod <- function(tmle_fit_0, tmle_fit_1, dat_full, mod_var){
 

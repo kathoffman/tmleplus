@@ -1,0 +1,100 @@
+---
+title: "Using `tmleplus` to calculate additional effects"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{tmleplus}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(knitr)
+library(tmleplus)
+```
+
+# `surv_effect_mod()`
+
+This function uses influence curves to calculate the difference and standard error in cumulative hazard or mean incidence for an effect modification variable.
+
+We demonstrate this by modifying the example from David Bankeser and Nima Hejazi's `survtmle` [vignette](https://cran.r-project.org/web/packages/survtmle/vignettes/survtmle_intro.html).
+
+We have 1000 observations with randomized treatment and randomized effect modification variables. The survival time (`ftime`) is affected by an interaction between the treatment and effect modification variable.
+```{r}
+set.seed(1234)
+n <- 1000
+t_0 <- 6
+trt <- rbinom(n, 1, 0.5)
+eff <- rbinom(n, 1, 0.5)
+adjustVars <- data.frame(W1 = round(runif(n)), W2 = round(runif(n, 0, 2)))
+ftime <- round(1 + runif(n, 1, 4) - trt*eff + adjustVars$W1 + adjustVars$W2)
+ftype <- round(runif(n, 0, 1))
+dat <- data.frame(trt, eff, adjustVars, ftime, ftype)
+```
+
+We can then stratify our data into patients with and without the effect modification variable and obtain `survtmle` estimates for the effect of treatment.
+
+For observations without the effect modifier:
+```{r}
+dat_a <- dat[dat$eff == 0,]
+trt <- dat_a$trt
+adjustVars <- dat_a[c("W1", "W2")]
+ftime <- dat_a$ftime
+ftype <- dat_a$ftype
+fit_a <- survtmle::survtmle(ftime = ftime, ftype = ftype,
+                  trt = trt, adjustVars = adjustVars,
+                  SL.trt = c("SL.glm", "SL.mean", "SL.step"),
+                  SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
+                  SL.ctime = c("SL.glm", "SL.mean", "SL.step"),
+                  method = "hazard", t0 = t_0)
+```
+
+For observations with the effect modifier:
+```{r}
+dat_b <- dat[dat$eff == 1,]
+trt <- dat_b$trt
+adjustVars <- dat_b[c("W1", "W2")]
+ftime <- dat_b$ftime
+ftype <- dat_b$ftype
+fit_b <- survtmle::survtmle(ftime = ftime, ftype = ftype,
+                  trt = trt, adjustVars = adjustVars,
+                  SL.trt = c("SL.glm", "SL.mean", "SL.step"),
+                  SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
+                  SL.ctime = c("SL.glm", "SL.mean", "SL.step"),
+                  method = "hazard", t0 = t_0)
+```
+
+Once we have obtained our two `survtmle` fits, we need only to specify the full data set, our effect modification variable, and the names of our `survtmle` objects.
+
+```{r}
+result <- surv_effect_mod(dat_full = dat,
+                          mod_var = "eff",
+                          tmle_fit_0 = fit_a,
+                          tmle_fit_1 = fit_b)
+```
+
+The resulting data frame contains:
+
+1. The estimate and standard error for the difference in the cumulative hazard (or mean) incidence between treated and untreated patients amongst those *with* the effect modification variable.
+
+2. The estimate and standard error for the difference in the cumulative hazard (or mean) incidence between treated and untreated patients amongst those *without* the effect modification variable.
+
+3. The overall difference and standard error between the effect modification groups.
+
+```{r}
+kable(result)
+```
+
+This result would indicate:
+
+1. A significant effect on the cumulative hazard incidence at `t0` between the treated and untreated observations for those *with* the effect modification variable.
+
+2. A non-significant effect on the cumulative hazard incidence at `t0` between the treated and untreated observations for those *without* the effect modification variable.
+
+3. An overall significant modification effect on the outcome.
