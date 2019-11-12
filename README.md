@@ -12,5 +12,5 @@ Depending on the function, fit objects come from R packages [`tmle`](https://cra
 
 ### surv_eff_mod()
 
-This function takes two fit objects from the `survtmle` package and calculates the difference and standard errors of the cumulative hazard (or mean) incidence at a specified time for a specified effect modifying variable using influence curves.
+This function takes two fit objects from the `survtmle` package and calculates the difference and standard errors of the cumulative hazard (or mean) incidence for a specified effect modifying variable using influence curves.
 
