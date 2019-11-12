@@ -1,5 +1,5 @@
 #' Calculate effect modification from survtmle fit objects
-#' @description This calculations an effect modifier's difference and corresponding standard error for the cumulative hazard incidence using objects obtained from the `survtmle` package.
+#' @description This calculations an effect modifier's difference and corresponding standard error for the marginal cumulative incidence using objects obtained from the `survtmle` package.
 #' @param dat_full The full data set containing all observations used to obtain each `tmle_fit_1` and `tmle_fit_0`.
 #' @param mod_var String containing column name of the effect modifying variable in `dat_full`.
 #' @param tmle_fit_1 survtmle fit object for only patients with the effect modifier
