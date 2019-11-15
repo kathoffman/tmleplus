@@ -23,7 +23,7 @@
 #' # Run survtmle for all subjects without the effect modifier
 #' dat_noeff <- dat[dat$eff == 0,]
 #' trt <- dat_noeff$trt
-#' adjustVars <- dat_noeff[c("W1", "W2)]
+#' adjustVars <- dat_noeff[c("W1", "W2")]
 #' ftime <- dat_noeff$ftime
 #' ftype <- dat_noeff$ftype
 #' fit_noeff <- survtmle::survtmle(ftime = ftime, ftype = ftype,
@@ -36,7 +36,7 @@
 #' # Run survtmle for all subjects with the effect modifier
 #' dat_eff <- dat[dat$eff == 1,]
 #' trt <- dat_eff$trt
-#' adjustVars <- dat_eff[c("W1", "W2)]
+#' adjustVars <- dat_eff[c("W1", "W2")]
 #' ftime <- dat_eff$ftime
 #' ftype <- dat_eff$ftype
 #' fit_eff <- survtmle::survtmle(ftime = ftime, ftype = ftype,
@@ -47,9 +47,9 @@
 #'                   method = "hazard", t0 = t_0)
 #'
 #' # Using the full data set, specify the effect modification column name as a string and tmle fits as 3rd and 4th args
-#' surv_effect_mod(dat_full = dat, mod_var = "eff", tmle_fit_0 = fit_noeff, tmle_fit_1 = fit_eff)
+#' surv_eff_mod(dat_full = dat, mod_var = "eff", tmle_fit_0 = fit_noeff, tmle_fit_1 = fit_eff)
 
-surv_effect_mod <- function(tmle_fit_0, tmle_fit_1, dat_full, mod_var){
+surv_eff_mod <- function(tmle_fit_1, tmle_fit_0, dat_full, mod_var){
 
     if (length(c(tmle_fit_0$trt, tmle_fit_1$trt)) == nrow(dat_full)){
 
@@ -76,11 +76,14 @@ surv_effect_mod <- function(tmle_fit_0, tmle_fit_1, dat_full, mod_var){
 
       effectmod <- effect_0 - effect_1
 
-      effects <- rbind(c(effect_1, effect_0, effectmod),
+      effects <- cbind(c(effect_1, effect_0, effectmod),
                        c(se_1, se_0, seeffmod))
 
-      colnames(effects) <- c('effect_1', 'effect_0', 'difference')
-      rownames(effects) <- c('estimate', 's.e.')
+      rownames(effects) <- c('effect_mod', 'effect_nomod', 'difference')
+      colnames(effects) <- c('estimate', 'st_err')
+      effects$ci_lo <- effects$effect_mod - 1.96*st_err
+      effects$ci_hi <- effects$effect_mod + 1.96*st_err
+      effects$z <- 2 * (1 - pnorm(effects$estimate / effects$st_err))
 
       return(effects)}
 
