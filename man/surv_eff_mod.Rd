@@ -4,12 +4,12 @@
 \alias{surv_eff_mod}
 \title{Calculate effect modification from survtmle fit objects}
 \usage{
-surv_eff_mod(tmle_fit_0, tmle_fit_1, dat_full, mod_var)
+surv_eff_mod(tmle_fit_1, tmle_fit_0, dat_full, mod_var)
 }
 \arguments{
-\item{tmle_fit_0}{survtmle fit object for only patients without the effect modifier}
-
 \item{tmle_fit_1}{survtmle fit object for only patients with the effect modifier}
+
+\item{tmle_fit_0}{survtmle fit object for only patients without the effect modifier}
 
 \item{dat_full}{The full data set containing all observations used to obtain each `tmle_fit_1` and `tmle_fit_0`.}
 

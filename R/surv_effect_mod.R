@@ -76,14 +76,14 @@ surv_eff_mod <- function(tmle_fit_1, tmle_fit_0, dat_full, mod_var){
 
       effectmod <- effect_0 - effect_1
 
-      effects <- cbind(c(effect_1, effect_0, effectmod),
-                       c(se_1, se_0, seeffmod))
+      effects <- data.frame(cbind(c(effect_1, effect_0, effectmod),
+                       c(se_1, se_0, seeffmod)))
 
       rownames(effects) <- c('effect_mod', 'effect_nomod', 'difference')
       colnames(effects) <- c('estimate', 'st_err')
-      effects$ci_lo <- effects$effect_mod - 1.96*st_err
-      effects$ci_hi <- effects$effect_mod + 1.96*st_err
-      effects$z <- 2 * (1 - pnorm(effects$estimate / effects$st_err))
+      effects$ci_lo <- effects$estimate - 1.96*effects$st_err
+      effects$ci_hi <- effects$estimate + 1.96*effects$st_err
+      #effects$z <- 2 * (1 - pnorm(effects$estimate / effects$st_err))
 
       return(effects)}
 
