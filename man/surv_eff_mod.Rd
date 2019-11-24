@@ -4,7 +4,7 @@
 \alias{surv_eff_mod}
 \title{Calculate effect modification from survtmle fit objects}
 \usage{
-surv_eff_mod(tmle_fit_1, tmle_fit_0, dat_full, mod_var)
+surv_eff_mod(tmle_fit_1, tmle_fit_0)
 }
 \arguments{
 \item{tmle_fit_1}{survtmle fit object for only patients with the effect modifier}
@@ -57,5 +57,5 @@ fit_eff <- survtmle::survtmle(ftime = ftime, ftype = ftype,
                   method = "hazard", t0 = t_0)
 
 # Using the full data set, specify the effect modification column name as a string and tmle fits as 3rd and 4th args
-surv_eff_mod(dat_full = dat, mod_var = "eff", tmle_fit_0 = fit_noeff, tmle_fit_1 = fit_eff)
+surv_eff_mod(tmle_fit_0 = fit_noeff, tmle_fit_1 = fit_eff)
 }

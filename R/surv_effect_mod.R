@@ -47,7 +47,7 @@
 #'                   method = "hazard", t0 = t_0)
 #'
 #' # Using the full data set, specify the effect modification column name as a string and tmle fits as 3rd and 4th args
-#' surv_eff_mod(dat_full = dat, mod_var = "eff", tmle_fit_0 = fit_noeff, tmle_fit_1 = fit_eff)
+#' surv_eff_mod(tmle_fit_0 = fit_noeff, tmle_fit_1 = fit_eff)
 
 surv_eff_mod <- function(tmle_fit_1, tmle_fit_0){
 

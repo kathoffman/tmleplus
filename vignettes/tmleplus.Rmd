@@ -19,13 +19,14 @@ library(knitr)
 library(tmleplus)
 ```
 
-# `surv_effect_mod()`
+# `surv_eff_mod()`
 
 This function uses influence curves to calculate the difference and standard error in marginal cumulative incidence for an effect modification variable.
 
 We demonstrate this by modifying the example from David Bankeser and Nima Hejazi's `survtmle` [vignette](https://cran.r-project.org/web/packages/survtmle/vignettes/survtmle_intro.html).
 
 We have 1000 observations with randomized treatment and randomized effect modification variables. The survival time (`ftime`) is affected by an interaction between the treatment and effect modification variable.
+
 ```{r}
 set.seed(1234)
 n <- 1000
@@ -42,27 +43,28 @@ We can then stratify our data into patients with and without the effect modifica
 
 For observations without the effect modifier:
 ```{r}
-dat_a <- dat[dat$eff == 0,]
-trt <- dat_a$trt
-adjustVars <- dat_a[c("W1", "W2")]
-ftime <- dat_a$ftime
-ftype <- dat_a$ftype
-fit_a <- survtmle::survtmle(ftime = ftime, ftype = ftype,
+dat_noeff <- dat[dat$eff == 0,]
+trt <- dat_noeff$trt
+adjustVars <- dat_noeff[c("W1", "W2")]
+ftime <- dat_noeff$ftime
+ftype <- dat_noeff$ftype
+fit_noeff <- survtmle::survtmle(ftime = ftime, ftype = ftype,
                   trt = trt, adjustVars = adjustVars,
                   SL.trt = c("SL.glm", "SL.mean", "SL.step"),
                   SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
                   SL.ctime = c("SL.glm", "SL.mean", "SL.step"),
                   method = "hazard", t0 = t_0)
+
 ```
 
 For observations with the effect modifier:
 ```{r}
-dat_b <- dat[dat$eff == 1,]
-trt <- dat_b$trt
-adjustVars <- dat_b[c("W1", "W2")]
-ftime <- dat_b$ftime
-ftype <- dat_b$ftype
-fit_b <- survtmle::survtmle(ftime = ftime, ftype = ftype,
+dat_eff <- dat[dat$eff == 1,]
+trt <- dat_eff$trt
+adjustVars <- dat_eff[c("W1", "W2")]
+ftime <- dat_eff$ftime
+ftype <- dat_eff$ftype
+fit_eff <- survtmle::survtmle(ftime = ftime, ftype = ftype,
                   trt = trt, adjustVars = adjustVars,
                   SL.trt = c("SL.glm", "SL.mean", "SL.step"),
                   SL.ftime = c("SL.glm", "SL.mean", "SL.step"),
@@ -73,15 +75,12 @@ fit_b <- survtmle::survtmle(ftime = ftime, ftype = ftype,
 Once we have obtained our two `survtmle` fits, we need only to specify the full data set, our effect modification variable, and the names of our `survtmle` objects.
 
 ```{r}
-result <- surv_effect_mod(dat_full = dat,
-                          mod_var = "eff",
-                          tmle_fit_0 = fit_a,
-                          tmle_fit_1 = fit_b)
+result <- surv_eff_mod(tmle_fit_0 = fit_a, tmle_fit_1 = fit_b)
 ```
 
-The resulting data frame contains:
+The resulting data frame contains the estimate, standard error, 95% confidence intervals and p-values for...
 
-1. The estimate and standard error for the difference in the marginal cumulative incidence between treated and untreated patients amongst those *with* the effect modification variable.
+1. The difference in the marginal cumulative incidence between treated and untreated patients amongst those *with* the effect modification variable.
 
 2. The estimate and standard error for the difference in the marginal cumulative incidence between treated and untreated patients amongst those *without* the effect modification variable.
 
