@@ -20,7 +20,7 @@
 #' ftype <- round(runif(n, 0, 1))
 #' dat <- data.frame(trt, eff, adjustVars, ftime, ftype)
 #'
-#' # Run survtmle for all subjects without the effect modifier
+#' # Stratify data and run survtmle for all subjects without the effect modifier
 #' dat_noeff <- dat[dat$eff == 0,]
 #' trt <- dat_noeff$trt
 #' adjustVars <- dat_noeff[c("W1", "W2")]
@@ -46,7 +46,7 @@
 #'                   SL.ctime = c("SL.glm", "SL.mean", "SL.step"),
 #'                   method = "hazard", t0 = t_0)
 #'
-#' # Using the full data set, specify the effect modification column name as a string and tmle fits as 3rd and 4th args
+#' # specify the two tmle fits as arguments
 #' surv_eff_mod(tmle_fit_0 = fit_noeff, tmle_fit_1 = fit_eff)
 
 surv_eff_mod <- function(tmle_fit_1, tmle_fit_0){
@@ -65,19 +65,19 @@ surv_eff_mod <- function(tmle_fit_1, tmle_fit_0){
     ic_0 <- ic_0 / (n_0 / N)
 
     # add in number of observations from the opposite strata as zero values
-    # 0s are added in opposite sides of vectors so we can calculate diff in ICs later
+    # 0s are added in opposite sides of vectors so we can merge ICs for standard errors later
     ic_1 <- c(ic_1, rep(0, n_0))
     ic_0 <- c(rep(0, n_1), ic_0)
 
-    # calculate the standard errors for each IC and their difference
-    se_1 <- sd(ic_1) / sqrt(N)
-    se_0 <- sd(ic_0) / sqrt(N)
+    # calculate the standard errors for each IC vector (stratified and combined)
+    se_1      <- sd(ic_1) / sqrt(N)
+    se_0      <- sd(ic_0) / sqrt(N)
     se_effmod <- sd(ic_1 - ic_0) / sqrt(N)
 
     # get the estimates and difference
     effect_1 <- diff(tmle_fit_1$est[, 1])
     effect_0 <- diff(tmle_fit_0$est[, 1])
-    effmod <- effect_0 - effect_1
+    effmod   <- effect_0 - effect_1
 
     # combine into a data frame and calculate 95% CIs and P-values
     effects <- data.frame(cbind(c(effect_1, effect_0, effmod),
