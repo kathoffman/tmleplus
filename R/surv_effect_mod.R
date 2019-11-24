@@ -49,45 +49,49 @@
 #' # Using the full data set, specify the effect modification column name as a string and tmle fits as 3rd and 4th args
 #' surv_eff_mod(dat_full = dat, mod_var = "eff", tmle_fit_0 = fit_noeff, tmle_fit_1 = fit_eff)
 
-surv_eff_mod <- function(tmle_fit_1, tmle_fit_0, dat_full, mod_var){
+surv_eff_mod <- function(tmle_fit_1, tmle_fit_0){
 
-    if (length(c(tmle_fit_0$trt, tmle_fit_1$trt)) == nrow(dat_full)){
+    # get relevant N's for later calculations
+    n_1 <- nrow(tmle_fit_1$ic)
+    n_0 <- nrow(tmle_fit_0$ic)
+    N   <- n_0 + n_1
 
-      ic_1 <- tmle_fit_1$ic[, 2] - tmle_fit_1$ic[, 1]
-      ic_0 <- tmle_fit_0$ic[, 2] - tmle_fit_0$ic[, 1]
+    # obtain differences in IC for treated vs untreated in each effect mod strata
+    ic_1 <- tmle_fit_1$ic[, 2] - tmle_fit_1$ic[, 1]
+    ic_0 <- tmle_fit_0$ic[, 2] - tmle_fit_0$ic[, 1]
 
-      dat_full[dat_full[mod_var] == 1, 'ic_1'] <- ic_1
-      dat_full[is.na(dat_full$ic_1), 'ic_1'] <- 0
-      dat_full[, 'ic_1'] <- dat_full[, mod_var] * dat_full[, 'ic_1'] /
-        mean(dat_full[, mod_var])
+    # normalize ICs to proportion of observations with and without effect mod var
+    ic_1 <- ic_1 / (n_1 / N)
+    ic_0 <- ic_0 / (n_0 / N)
 
-      dat_full[dat_full[mod_var] == 0, 'ic_0'] <- ic_0
-      dat_full[is.na(dat_full$ic_0), 'ic_0'] <- 0
-      dat_full[, 'ic_0'] <- (1 - dat_full[, mod_var]) * dat_full[, 'ic_0'] /
-        mean(1 - dat_full[, mod_var])
+    # add in number of observations from the opposite strata as zero values
+    # 0s are added in opposite sides of vectors so we can calculate diff in ICs later
+    ic_1 <- c(ic_1, rep(0, n_0))
+    ic_0 <- c(rep(0, n_1), ic_0)
 
-      se_1 <- sd(dat_full$ic_1) / sqrt(nrow(dat_full))
-      se_0 <- sd(dat_full$ic_0) / sqrt(nrow(dat_full))
+    # calculate the standard errors for each IC and their difference
+    se_1 <- sd(ic_1) / sqrt(N)
+    se_0 <- sd(ic_0) / sqrt(N)
+    se_effmod <- sd(ic_1 - ic_0) / sqrt(N)
 
-      seeffmod <- sd(with(dat_full, ic_1 - ic_0)) / sqrt(nrow(dat_full))
+    # get the estimates and difference
+    effect_1 <- diff(tmle_fit_1$est[, 1])
+    effect_0 <- diff(tmle_fit_0$est[, 1])
+    effmod <- effect_0 - effect_1
 
-      effect_1 <- diff(tmle_fit_1$est[, 1])
-      effect_0 <- diff(tmle_fit_0$est[, 1])
+    # combine into a data frame and calculate 95% CIs and P-values
+    effects <- data.frame(cbind(c(effect_1, effect_0, effmod),
+                                c(se_1, se_0, se_effmod)))
+    rownames(effects) <- c('effect_mod', 'effect_nomod', 'difference')
+    colnames(effects) <- c('estimate', 'st_err')
+    effects$ci_lo <- effects$estimate - 1.96 * effects$st_err
+    effects$ci_hi <- effects$estimate + 1.96 * effects$st_err
+    effects$p_val <- 2 * (1 - pnorm(abs(effects$estimate / effects$st_err)))
 
-      effectmod <- effect_0 - effect_1
+    return(effects)
 
-      effects <- data.frame(cbind(c(effect_1, effect_0, effectmod),
-                       c(se_1, se_0, seeffmod)))
+    }
 
-      rownames(effects) <- c('effect_mod', 'effect_nomod', 'difference')
-      colnames(effects) <- c('estimate', 'st_err')
-      effects$ci_lo <- effects$estimate - 1.96*effects$st_err
-      effects$ci_hi <- effects$estimate + 1.96*effects$st_err
-      #effects$z <- 2 * (1 - pnorm(effects$estimate / effects$st_err))
 
-      return(effects)}
 
-    else {cat("Number of observations contained in the tmle fits and full data set differ. \nCheck that tmle_fit_0 and tmle_fit_1 together contain all observations in dat_full and vice versa.")}
-
-  }
 
