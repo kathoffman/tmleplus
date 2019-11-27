@@ -12,5 +12,5 @@ Depending on the function, fit objects come from R packages [`tmle`](https://cra
 
 ### `surv_eff_mod()`
 
-This function takes two fit objects from the `survtmle` package and uses the influence curves to calculate the difference and standard errors of the marginal cumulative incidence for an effect modifying variable.
+This function takes two fit objects from the [`survtmle`](https://cran.r-project.org/web/packages/survtmle/survtmle.pdf) package and uses the influence curves to calculate the difference and standard errors of the marginal cumulative incidence for an effect modification variable.
 
