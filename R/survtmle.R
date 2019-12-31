@@ -1,7 +1,5 @@
 #' Calculate effect modification from survtmle fit objects
 #' @description This calculations an effect modifier's difference and corresponding standard error for the marginal cumulative incidence using objects obtained from the `survtmle` package.
-#' @param dat_full The full data set containing all observations used to obtain each `tmle_fit_1` and `tmle_fit_0`.
-#' @param mod_var String containing column name of the effect modifying variable in `dat_full`.
 #' @param tmle_fit_1 survtmle fit object for only patients with the effect modifier
 #' @param tmle_fit_0 survtmle fit object for only patients without the effect modifier
 #'
@@ -93,5 +91,48 @@ surv_eff_mod <- function(tmle_fit_1, tmle_fit_0){
     }
 
 
+
+
+
+#' Tidy one survtmle object
+#'
+#' @param tmle_fit A survtmle fit object
+#'
+#' @return a data frame with the difference in marginal cumulative incidence for a treatment of interest, with standard errors, p-values, and 95% confidence interval
+#' @export
+#'
+#' @examples
+surv_tidy <- function(tmle_fit){
+    diff <- tmle_fit$est[2, ] - tmle_fit$est[1, ]
+    se <- sd(tmle_fit$ic[, 2] - tmle_fit$ic[, 1]) / sqrt(nrow(tmle_fit$ic))
+    ci_lo <- diff - 1.96 * se
+    ci_hi <- diff + 1.96 * se
+    pval <- 2 * pnorm(abs(diff) / se, lower.tail = FALSE)
+    return(data.frame(diff = diff, se = se, pval = pval, ci_lo = ci_lo, ci_hi = ci_hi))
+}
+
+
+#' Contrast one survtmle object against another (for multilevel exposure)
+#'
+#' @param tmle_fit_1 survtmle fit from the exposure of interest
+#' @param tmle_fit_0 survtmle fit from the reference exposure
+#'
+#' @return A data frame with a row for the difference, standard error, p-value and 95% CI
+#' @export
+#'
+#' @examples
+surv_contrast <- function(tmle_fit_1, tmle_fit_0) {
+    diff <- tmle_fit_1$est[2, ] - tmle_fit_0$est[2, ]
+    se <- sd(tmle_fit_1$ic[, 2] - tmle_fit_00$ic[, 2]) / sqrt(nrow(tmle_fit_1$ic))
+    ci_lo <- diff - 1.96 * se
+    ci_hi <- diff + 1.96 * se
+    pval <- 2 * pnorm(abs(diff) / se, lower.tail = FALSE)
+    return(data.frame(diff = diff, se = se, pval = pval, ci_lo = ci_lo, ci_hi = ci_hi))
+}
+
+
+surv_mdog <- function(tmle_fit){
+
+}
 
 
