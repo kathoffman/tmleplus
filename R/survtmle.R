@@ -131,8 +131,8 @@ surv_contrast <- function(tmle_fit_1, tmle_fit_0) {
 }
 
 
-surv_mdog <- function(tmle_fit){
-
+surv_hists <- function(tmle_fit){
+    print(tmle_fit)
 }
 
 
