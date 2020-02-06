@@ -9,5 +9,5 @@
 #'
 #' @examples
 tidy_tmle <- function(fit, ...) {
-  UseMethod("fit")
+  UseMethod("tidy_tmle")
 }
