@@ -1,9 +1,42 @@
 
-tidy_tmle.tmle <- function(fit, obs_a, obs_y) {
+#' Title
+#'
+#' @param fit
+#' @param obs_a
+#' @param obs_y
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' set.seed(1)
+#' n <- 250
+#' W <- matrix(rnorm(n*3), ncol=3)
+#' A <- rbinom(n,1, 1/(1+exp(-(.2*W[,1] - .1*W[,2] + .4*W[,3]))))
+#' Y <- A + 2*W[,1] + W[,3] + W[,2]^2 + rnorm(n)
+#' tmle_fit <- tmle::tmle(Y,A,W, Q.SL.library = "SL.glm", g.SL.library = "SL.glm")
+#' tidy_tmle(tmle_fit, A, Y)
+tidy_tmle.tmle <- function(fit, a = NULL, y = NULL) {
 
   tmle_fit <- fit
+  oob_estimates <- tmle_fit$estimates[oob_tmle_estimates]
+  available_oob <- names(lapply(oob_estimates, is.null))[!unlist(lapply(oob_estimates, is.null))]
+  oob <- purrr::map_dfr(oob_estimates[available_oob], out_of_box, .id = "parameter")
 
-  if (is.null(obs_a)) {
+  if (is.null(a)) {
+    if (is.null(y)) {
+      # need to access influence curve info for the ATE, ATT, and ATC when a and y are NULL
+      # likely requires rewriting get_IF
+    }
+    out <- list(estimates = oob,
+                IF = tmle_fit$estimates$IC$IC.EY1)
+    return(out)
+  }
+
+  if (is.null(a)) {
+    if (is.null(y)) {
+
+    }
     infer <- cbind(data.frame(parameter = "EY1"), out_of_box.tmle(tmle_fit$estimates$EY1))
     out <- list(estimates = infer,
                 IF = tmle_fit$estimates$IC$IC.EY1)
@@ -15,7 +48,7 @@ tidy_tmle.tmle <- function(fit, obs_a, obs_y) {
   g0w <- 1 - g1w
   Q1W <- tmle_fit$Qstar[, 2]
   Q0W <- tmle_fit$Qstar[, 1]
-  use <- data.frame(A = obs_a,
+  use <- data.frame(A = a,
                     Y = obs_y,
                     g1w = g1w,
                     g0w = g0w,
@@ -54,6 +87,7 @@ get_IF <- function(data) {
   }
 
   IF <- purrr::pmap(list(i. = i, g. = g, q. = q), build_IF)
+  # dont really need this when we already have it calculated for us
   ate_IF <- IF[[1]] - IF[[2]]
   out <- data.frame(a1_IF = IF[[1]],
                     a0_IF = IF[[2]],
